@@ -53,8 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     //If ternario
                     icon: Icon(
                       _obscureText
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
                     ),
                     onPressed: () {
                       //Refresca el Icono al ser seleccionado
