@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rive/rive.dart';
 
+import 'dart:async'; //3.1 Importar Timer
+
 class LoginScreen extends StatefulWidget {
   const new({super.key});
 
@@ -18,6 +20,10 @@ class _LoginScreenState extends State<LoginScreen> {
   SMIBool? _isHandsUp;
   SMITrigger? _trigSuccess;
   SMITrigger? _trigFail;
+  //2.1 Variable para el recorrido de la mirada
+  SMINumber? _numLook;
+  //3.2 Timer para detener la miarada al dejar de escribir
+  Timer? _typingDebounce;
 
   //1.1 Crear variables para focusNode
   final _emailFocusNode = FocusNode();
@@ -33,6 +39,8 @@ class _LoginScreenState extends State<LoginScreen> {
         if (_isHandsUp != null) {
           //Manos arriba en el email
           _isHandsUp?.change(false);
+          //2.2 Mirada Neutral
+          _numLook?.value = 50;
         }
       }
     });
@@ -74,6 +82,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     _isHandsUp = _controller!.findSMI('isHandsUp');
                     _trigSuccess = _controller!.findSMI('trigSuccess');
                     _trigFail = _controller!.findSMI('trigFail');
+                    //2.3 Vincular variable numLook
+                    _numLook = _controller!.findSMI('numLook');
                   },
                 ),
               ),
@@ -92,6 +102,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (_isChecking == null) return;
                   //Activar modo chismoso
                   _isChecking!.change(true);
+                  //2.4 Implementar numLook
+                  //Ajuste de limites de 0 a 100
+                  //80 medida de calibracion
+                  final look = (value.length / 60.0 * 100.0).clamp(0.0, 100.0);
+                  //Clamp es el rango (abrazadera)
+                  _numLook?.value = look;
+
+                  //3.3 Debounce: si vuelve a teclar reinicia el contador
+                  //Cancelar cualquier timer existente (buena practica)
+                  _typingDebounce?.cancel();
+                  //Crear un nuevo timer
+                  _typingDebounce = Timer(const Duration(seconds: 3), () {
+                    //Si se cierra la pantalla (!mounted es que no este activa)
+                    if (!mounted) return;
+                    //Mirada neutra
+                    _isChecking?.change(false);
+                  });
                 },
                 //Para mostar un tipo de teclado
                 keyboardType: TextInputType.emailAddress,
@@ -155,6 +182,8 @@ class _LoginScreenState extends State<LoginScreen> {
     //Liberar memoria/recursos al salir de la pantalla
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
+    //3.4 Liberar timer
+    _typingDebounce?.cancel();
     super.dispose();
   }
 }
