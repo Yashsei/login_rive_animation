@@ -13,6 +13,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   //Control mostrar/ocultar Password
   bool _obscureText = true;
+  //5.1 Variable de checkbox Remember Me
+  bool isChecked = false;
   //Crear el cerebro de las Animaciones(StateMachine)
   StateMachineController? _controller;
   //SMI: State Machine Input
@@ -75,7 +77,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     //4.7 Activar triggers
     if (eError == null && pError == null) {
-      _trigSuccess?.fire();
+      //Delay para boton 1 activacion
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (mounted) _trigSuccess?.fire();
+      });
     } else {
       _trigFail?.fire();
     }
@@ -234,13 +239,30 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: 10),
                 //Texto Olvide Mi contraseña
-                SizedBox(
-                  width: size.width,
-                  child: const Text(
-                    'Forgot password?',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(decoration: TextDecoration.underline),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          value: isChecked,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              isChecked = newValue ?? true;
+                            });
+                          },
+                        ),
+                        const Text('Remember', textAlign: TextAlign.right),
+                      ],
+                    ),
+                    const Text(
+                      'Forgot password?',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(decoration: TextDecoration.underline),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 10),
                 MaterialButton(
